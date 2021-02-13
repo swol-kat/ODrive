@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # C extensions
-*.so
+#*.so
 
 # Unit test / coverage reports
 htmlcov/
@@ -31,8 +31,8 @@ target/
 .ipynb_checkpoints
 
 # Tup
-.tup
-tup.config
+#.tup
+#tup.config
 
 # Sphinx documentation
 /docs/_build/
@@ -48,21 +48,25 @@ tup.config
 /docs/.jekyll-metadata
 
 
-*.exe
+#*.exe
 
-ODrive\.config
+#ODrive\.config
 
-ODrive\.creator
+#ODrive\.creator
 
-ODrive\.creator\.user
+#ODrive\.creator\.user
 
-ODrive\.files
+#ODrive\.files
 
-ODrive\.includes
+#ODrive\.includes
 
-Firmware/Tests/bin/
+#Firmware/Tests/bin/
 
 # GUI
 GUI/dist_electron
 GUI/node_modules
 GUI/build
+
+#hex
+!*.hex
+!Firmware/build/

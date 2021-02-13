@@ -101,11 +101,13 @@ public:
 
     bool abs_spi_init();
     bool abs_spi_start_transaction();
+    bool abs_spi_clear_AMS_error();
+    bool reset_AMS = false;
     void abs_spi_cb();
     void abs_spi_cs_pin_init();
     uint16_t abs_spi_dma_tx_[1] = {0xFFFF};
     uint16_t abs_spi_dma_rx_[1];
-    uint16_t abs_spi_reset_enc[1] = {0x0001 & (0x1 << 14)}
+    uint16_t abs_spi_reset_enc[1] = {0x0001 & (0x1 << 14)};
     bool abs_spi_pos_updated_ = false;
     Mode mode_ = MODE_INCREMENTAL;
     GPIO_TypeDef* abs_spi_cs_port_;

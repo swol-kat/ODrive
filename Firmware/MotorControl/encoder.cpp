@@ -342,6 +342,7 @@ bool Encoder::abs_spi_init(){
     if (mode_ == MODE_SPI_ABS_AEAT) {
         spi->Init.CLKPolarity = SPI_POLARITY_HIGH;
     }
+    reset_AMS = false;
     HAL_SPI_DeInit(spi);
     HAL_SPI_Init(spi);
     return true;
@@ -355,14 +356,11 @@ bool Encoder::abs_spi_start_transaction(){
             return false;
         }
         HAL_GPIO_WritePin(abs_spi_cs_port_, abs_spi_cs_pin_, GPIO_PIN_RESET);
-        HAL_SPI_TransmitReceive_DMA(hw_config_.spi, (uint8_t*)abs_spi_dma_tx_, (uint8_t*)abs_spi_dma_rx_, 1);
-    }
-    return true;
-}
-
-bool Encoder::abs_spi_clear_AMS_error(){
-    if (mode_ & MODE_FLAG_ABS){
-        HAL_SPI_TransmitReceive_DMA(hw_config_.spi, (uint8_t*)abs_spi_reset_enc, (uint8_t*)abs_spi_dma_rx_, 1);
+        if(reset_AMS){
+            HAL_SPI_TransmitReceive_DMA(hw_config_.spi, (uint8_t*)abs_spi_reset_enc, (uint8_t*)abs_spi_dma_rx_, 1);
+        }else{
+            HAL_SPI_TransmitReceive_DMA(hw_config_.spi, (uint8_t*)abs_spi_dma_tx_, (uint8_t*)abs_spi_dma_rx_, 1);
+        }
     }
     return true;
 }
@@ -397,7 +395,11 @@ void Encoder::abs_spi_cb(){
                 return;
             }
             if(((rawVal >> 14) & 1)){
-                abs_spi_clear_AMS_error()
+                reset_AMS = true;
+                return;
+            }
+            if(reset_AMS){
+                reset_AMS = false;
                 return;
             }
             pos = rawVal & 0x3fff;
