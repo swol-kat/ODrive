@@ -334,7 +334,7 @@ bool Encoder::abs_spi_init(){
     spi->Init.CLKPolarity = SPI_POLARITY_LOW;
     spi->Init.CLKPhase = SPI_PHASE_2EDGE;
     spi->Init.NSS = SPI_NSS_SOFT;
-    spi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+    spi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32; //slowed down from 32
     spi->Init.FirstBit = SPI_FIRSTBIT_MSB;
     spi->Init.TIMode = SPI_TIMODE_DISABLE;
     spi->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -356,6 +356,13 @@ bool Encoder::abs_spi_start_transaction(){
         }
         HAL_GPIO_WritePin(abs_spi_cs_port_, abs_spi_cs_pin_, GPIO_PIN_RESET);
         HAL_SPI_TransmitReceive_DMA(hw_config_.spi, (uint8_t*)abs_spi_dma_tx_, (uint8_t*)abs_spi_dma_rx_, 1);
+    }
+    return true;
+}
+
+bool Encoder::abs_spi_clear_AMS_error(){
+    if (mode_ & MODE_FLAG_ABS){
+        HAL_SPI_TransmitReceive_DMA(hw_config_.spi, (uint8_t*)abs_spi_reset_enc, (uint8_t*)abs_spi_dma_rx_, 1);
     }
     return true;
 }
@@ -386,7 +393,11 @@ void Encoder::abs_spi_cb(){
         case MODE_SPI_ABS_AMS: {
             uint16_t rawVal = abs_spi_dma_rx_[0];
             // check if parity is correct (even) and error flag clear
-            if (ams_parity(rawVal) || ((rawVal >> 14) & 1)) {
+            if (ams_parity(rawVal)) {
+                return;
+            }
+            if(((rawVal >> 14) & 1)){
+                abs_spi_clear_AMS_error()
                 return;
             }
             pos = rawVal & 0x3fff;
